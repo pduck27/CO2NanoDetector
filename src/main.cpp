@@ -1,3 +1,7 @@
+// TODO:
+// Animation in own function without general loop
+// triggerButton shows current value as number in Matrix
+
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <LedControl.h>
@@ -12,6 +16,9 @@
 #define HIGH_Q 800
 #define MEDIUM_Q 1200
 #define NO_INTVL 5
+
+// Optional trigger
+int tasterPin = 4;
 
 // General variables
 int co2value = 0;   
@@ -96,11 +103,24 @@ void setup()
   // Initialize Led
   display.shutdown(0,false);       
   display.setIntensity(0,0);
-  display.clearDisplay(0);   
+  display.clearDisplay(0); 
+
+  // Inititalize trigger button
+  pinMode(tasterPin,INPUT);  
 }
 
 void loop()
 { 
+
+  if (digitalRead(tasterPin)==HIGH){
+    Serial.println("Button high");
+  }
+
+  // Read CO2 value
+  co2value = readCO2();                
+  Serial.println(co2value);  
+
+  // Show "open window" animation or smiley
   if (animationModus){    
     displayImage(WINDOW_ANIMATION[i]);
     if (++i >= WINDOW_ANIMATION_LEN ) {
@@ -110,11 +130,7 @@ void loop()
     delay(500);
 
   } else
-  {
-    // Read CO2
-    co2value = readCO2();                
-    Serial.println(co2value);  
-    
+  { 
     // Show smiley
     if (co2value <= HIGH_Q) {
       // Good quality
