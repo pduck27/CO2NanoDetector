@@ -1,6 +1,7 @@
 // TODO:
 // Animation in own function without general loop
 // triggerButton shows current value as number in Matrix
+// triggerButton activates energy save mode
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
