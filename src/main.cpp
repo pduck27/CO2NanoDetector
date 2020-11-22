@@ -137,7 +137,7 @@ void loop()
       }
 
     } else if (currLevel != LOW_L) {
-      // Bad quality
+      // Bad quality 
       display.clearDisplay(0);
       displayImage(SMILEY_IMAGES[SAD_IMAGE]);
       currLevel = LOW_L;
