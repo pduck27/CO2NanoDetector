@@ -1,8 +1,3 @@
-// TODO:
-// Animation in own function without general loop
-// triggerButton shows current value as number in Matrix
-// triggerButton activates energy save mode
-
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <LedControl.h>
@@ -15,20 +10,20 @@
 
 // Tresholds
 #define HIGH_Q 800
-#define MEDIUM_Q 1200
+#define AVERAGE_Q 1200
 #define NO_INTVL 5
 
-// Optional trigger
-int tasterPin = 4;
+// Optional trigger button
+int buttonPin = 4;
 
 // General variables
-int co2value = 0;   
-int i = 0;   
+int co2value;   
+int secondsUntilAnim;        
+int currImage;
 int measureInterval = 2000;
-int secondsUntilAnim = 5;        
 bool animationModus = false;
 
-enum level {UNDEFINED_L, LOW_L, MEDIUM_L, HIGH_L};
+enum level {UNDEFINED_L, LOW_L, AVERAGE_L, HIGH_L};
 level currLevel = UNDEFINED_L;
 
 SoftwareSerial co2Serial(2, 3);                                             // RX from MH-Z19B, TX from MH-Z19B Pin
@@ -45,9 +40,25 @@ const uint64_t SMILEY_IMAGES[] = {
   0x3c42a58989a5423c
 };
 const int SMILEY_IMAGES_LEN = sizeof(SMILEY_IMAGES)/8;
-const int SMILE_IMAGE = 0;
-const int MEDIUM_IMAGE = 1;
-const int SAD_IMAGE = 2;
+const int HIGH_IMAGE = 0;
+const int AVERAGE_IMAGE = 1;
+const int LOW_IMAGE = 2;
+
+// Numbers
+// https://xantorohara.github.io/led-matrix-editor/#003e7f51497f3e00|0001017f7f110100|0031794945672300|00367f4949632200|00047f7f24140c00|004e5f5151737200|00266f49497f3e00|0060785f47606000|00367f49497f3600|003e7f49497b3200
+const uint64_t NUMBER_IMAGES[] = {
+  0x003e7f51497f3e00,
+  0x0001017f7f110100,
+  0x0031794945672300,
+  0x00367f4949632200,
+  0x00047f7f24140c00,
+  0x004e5f5151737200,
+  0x00266f49497f3e00,
+  0x0060785f47606000,
+  0x00367f49497f3600,
+  0x003e7f49497b3200
+};
+const int NUMBER_IMAGES_LEN = sizeof(NUMBER_IMAGES)/8;
 
 // Window Animation
 const uint64_t WINDOW_ANIMATION[] = {
@@ -93,11 +104,83 @@ void displayImage(uint64_t image) {
   }
 }
 
+// Switch to new Level
+void switchToLevel(int newSmileyImageNo, level newLevel){
+  display.clearDisplay(0);
+  currLevel = newLevel;        
+  currImage = newSmileyImageNo;
+  displayImage(SMILEY_IMAGES[currImage]);  
+  secondsUntilAnim = 5;
+}
+
+// Reset to last state
+void resetLevel(){
+  switchToLevel(currImage, currLevel);
+}
+
+// Display Window Animation
+void displayWindowAnimation(){
+  display.clearDisplay(0);
+  for (int i = 0; i < WINDOW_ANIMATION_LEN; i++){  
+    displayImage(WINDOW_ANIMATION[i]);
+    delay(500);
+  }
+  resetLevel();
+}
+
+// Display Digit number with delays
+void displayNumber(int numberToDisplay)
+{
+  displayImage(NUMBER_IMAGES[numberToDisplay]);
+  delay(800);
+  display.clearDisplay(0);
+  delay(200);
+}
+
+// Show CO2 value as digits
+void showValue(int value){
+int ones = (value%10);
+    int tens = (value/10) %10;
+    int hundreds = (value/100) %10;
+    int thousands = (value/1000);
+    bool showZero = false;
+    
+    display.clearDisplay(0);
+    delay(200);
+
+    if (thousands > 0){      
+      displayNumber(thousands);
+      Serial.println(thousands);      
+      showZero = true;
+    }
+
+    if (hundreds > 0 || showZero){      
+      displayNumber(hundreds);
+      Serial.println(hundreds);      
+      showZero = true;
+    }
+
+    if (tens > 0 || showZero){      
+      displayNumber(tens);
+      Serial.println(tens);      
+      showZero = true;
+    }
+
+    if (ones > 0 || showZero){      
+      displayNumber(ones);
+      Serial.println(ones);      
+    }   
+    
+    resetLevel();
+}
+
+// Setup
 void setup()
 {            
-  // Start CO2 detection
-  co2Serial.begin(9600);
   Serial.begin(115200);
+  
+  // Start CO2 detection
+  co2Serial.begin(9600);  
   Serial.println("");
   Serial.println("Start CO2 detection");
 
@@ -107,70 +190,53 @@ void setup()
   display.clearDisplay(0); 
 
   // Inititalize trigger button
-  pinMode(tasterPin,INPUT);  
+  pinMode(buttonPin, INPUT);   
 }
 
+
+// Loop
 void loop()
 { 
 
-  if (digitalRead(tasterPin)==HIGH){
-    Serial.println("Button high");
+  if (digitalRead(buttonPin)==HIGH){
+    Serial.println("Button high, show CO2 value");    
+    showValue(co2value);
   }
 
   // Read CO2 value
   co2value = readCO2();                
-  Serial.println(co2value);  
-
-  // Show "open window" animation or smiley
-  if (animationModus){    
-    displayImage(WINDOW_ANIMATION[i]);
-    if (++i >= WINDOW_ANIMATION_LEN ) {
-        animationModus = false;
-        secondsUntilAnim = 5;
-      }
-    delay(500);
-
-  } else
-  { 
-    // Show smiley
-    if (co2value <= HIGH_Q) {
-      // Good quality
-      if (currLevel != HIGH_L){
-        display.clearDisplay(0);
-        displayImage(SMILEY_IMAGES[SMILE_IMAGE]);
-        currLevel = HIGH_L;  
-        Serial.println("Switch to HIGH");
-        secondsUntilAnim = 5;
-      }
-
-    } else if (co2value <= MEDIUM_Q) {
-      // Medium quality
-      if (currLevel != MEDIUM_L){
-        display.clearDisplay(0);
-        displayImage(SMILEY_IMAGES[MEDIUM_IMAGE]);
-        currLevel = MEDIUM_L;  
-        Serial.println("Switch to MIDDLE");
-        secondsUntilAnim = 5;
-      }
-
-    } else if (currLevel != LOW_L) {
-      // Bad quality 
-      display.clearDisplay(0);
-      displayImage(SMILEY_IMAGES[SAD_IMAGE]);
-      currLevel = LOW_L;
-      Serial.println("Switch to LOW");
-
-    } else if (currLevel == LOW_L) {
-      // Counter to show window animation when bad quality
-      secondsUntilAnim -= 1;
-      if (secondsUntilAnim <= 0){
-        Serial.println("Show window animation");
-        animationModus = true;
-        i = 0;
-      }
+  Serial.println(co2value);    
+ 
+  // Show smiley
+  if (co2value <= HIGH_Q) {
+    // Good quality
+    if (currLevel != HIGH_L){
+      switchToLevel(HIGH_IMAGE, HIGH_L);      
+      Serial.println("Switch to HIGH");      
     }
-      
-    delay(measureInterval); 
-  }  
+
+  } else if (co2value <= AVERAGE_Q) {
+    // Medium quality
+    if (currLevel != AVERAGE_L){
+      switchToLevel(AVERAGE_IMAGE, AVERAGE_L);   
+      Serial.println("Switch to AVERAGE");      
+    }
+
+  } else if (currLevel != LOW_L) {
+    // Bad quality 
+    switchToLevel(LOW_IMAGE, LOW_L);  
+    Serial.println("Switch to LOW");    
+
+  } else if (currLevel == LOW_L) {
+    // Counter to show window animation when bad quality
+    secondsUntilAnim -= 1;
+    if (secondsUntilAnim <= 0){
+      Serial.println("Show window animation");
+      displayWindowAnimation();      
+    }
+  }
+    
+  delay(measureInterval); 
+ 
         
 }
