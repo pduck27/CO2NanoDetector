@@ -1,3 +1,8 @@
+// Code was mainly copied and overworked from other projects.
+// Thanks to: https://esp8266-server.de/CO2Ampel.html
+// and: https://xantorohara.github.io/led-matrix-editor
+
+
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <LedControl.h>
