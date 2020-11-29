@@ -13,14 +13,19 @@ You need:
 - Cables, plugs and so on depending on your needs
 
 The code checks every second the current CO2 quality in ppm. 
-According to the ppm value it shows a smiley in the matrix. 
-If the quality is too bad also a window animation is shown.
+According to the ppm value it shows a smiley in the matrix.
+The default thresholds in the code are:
 
+0 - 800 ppm Good quality -> smiling face
+
+801 - 1200 ppm Average quality -> neutral face
+
+\>1200 ppm Bad quality -> sad face and a window open animation each five seconds
+ 
 You can connect an optional button, which shows the ppm value as digits in the matrix when pressed long.
 
-The code was built with VS Code and Plattform.IO Extension. 
-
-My plattfomio.ini looks like this (keep an eye on lib_deps you must include):   
+# Code and circuit
+The code was built with VS Code and Plattform.IO Extension. My plattfomio.ini looks like this (keep an eye on lib_deps you must include):   
 
     [env:nanoatmega328]
     platform = atmelavr    
