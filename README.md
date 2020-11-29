@@ -36,4 +36,9 @@ Check and maybe adjust the pin setting from source file:
 - 10,11 and 13 for the matrix control
 - 4 to the button (crossed with a 100kOhm resistor to 3,3 voltage output)
 
+My circuit looks like this. Unfortunatley I did not find a good image for the LED connectors.
+https://github.com/pduck27/CO2NanoDetector/blob/main/circuit/circuit_Schaltplan.png
+
+![circuit image](/circuit/circuit_Schaltplan.png?raw=true "Circuit")
+
 
