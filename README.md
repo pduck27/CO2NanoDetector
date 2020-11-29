@@ -18,4 +18,22 @@ If the quality is too bad also a window animation is shown.
 
 You can connect an optional button, which shows the ppm value as digits in the matrix when pressed long.
 
-The code was built with VS Code and Plattform.IO Extension.
+The code was built with VS Code and Plattform.IO Extension. 
+
+My plattfomio.ini looks like this (keep an eye on lib_deps you must include):   
+
+    [env:nanoatmega328]
+    platform = atmelavr    
+    board = nanoatmega328    
+    framework = arduino    
+    monitor_speed = 115200    
+    upload_port = com8    
+    lib_deps = 
+    	wayoda/LedControl@^1.0.6
+	
+Check and maybe adjust the pin setting from source file:
+- 2 and 3 (TX & RX) to the CO2 detector
+- 10,11 and 13 for the matrix control
+- 4 to the button (crossed with a 100kOhm resistor to 3,3 voltage output)
+
+
