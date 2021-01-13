@@ -1,9 +1,12 @@
-# CO2NanoDetector
+# CO2NanoDetector (Arduino CO2 warning light / Arduino CO2 Ampel)
 Small project to combine Arduino nano with CO2 detection and a LED matrix.
 The matrix shows several states of CO2 quality, so you know when it is time for fresh air.
 
-The final setup was glued into a Minecraft styled scene.
-Check thingiverse for some pictures https://www.thingiverse.com/thing:4668278
+The final setup was glued into a 3D printed Minecraft styled scene (more pictures at the bottom of the page).
+
+![detector image](/pictures/20201122_184132.jpg)
+
+Check Thingiverse for details about the prints: https://www.thingiverse.com/thing:4668278
 
 # What you need
 You need (see circuit below):
@@ -12,7 +15,7 @@ You need (see circuit below):
 - MH-Z19 CO2 sensor
 - A button to show the ppm value as digits is optional
 - Cables, plugs and so on depending on your needs
-- I use an old powerbank Lipo with a 18650 Battery Shield to run it. Be careful, the power consumption is so low that a powerbank maybe goes to sleep mode. Check the internet for possible solutions with an additional resistor. 
+- I use an old powerbank Lipo with a 18650 Battery Shield to run it but a pure USB micro power adapter works too. Be careful, the power consumption is so low that a powerbank maybe goes to sleep mode. Check the internet for possible solutions with an additional resistor. 
 
 # How it works
 The code checks every second the current CO2 quality in ppm. 
@@ -50,4 +53,10 @@ My circuit looks like this. Unfortunatley I did not find a good image for the LE
 
 ![circuit image](/circuit/circuit_Schaltplan.png?raw=true "Circuit")
 
+# More pictures
+
+![detector image](/pictures/20201122_184132.jpg)
+![detector image](/pictures/20201122_184200.jpg)
+![detector image](/pictures/20201122_164150.jpg)
+![detector image](/pictures/20201122_164146.jpg)
 
